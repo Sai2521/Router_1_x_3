@@ -1,105 +1,157 @@
-module router_reg(clock,resetn,pkt_valid,data_in,fifo_full,detect_add,
-                  ld_state,laf_state,full_state,lfd_state,rst_int_reg,err,
-                  parity_done,low_packet_valid,dout);
+module router_sync(clock,resetn,data_in,detect_add,full_0,full_1,full_2,empty_0,empty_1,empty_2,write_enb_reg,read_enb_0,read_enb_1,read_enb_2,write_enb,fifo_full,vld_out_0,vld_out_1,vld_out_2,soft_reset_0,soft_reset_1,soft_reset_2);
 
-input clock,resetn,pkt_valid,fifo_full,detect_add,ld_state,laf_state,full_state,lfd_state,rst_int_reg;
-input [7:0]data_in;
-output reg err,parity_done,low_packet_valid;
-output reg [7:0]dout;
-reg [7:0]header,int_reg,int_parity,ext_parity;
+
+input clock,resetn,detect_add,full_0,full_1,full_2,empty_0,empty_1,empty_2,write_enb_reg,read_enb_0,read_enb_1,read_enb_2;
+input [1:0]data_in;
+output reg[2:0]write_enb;
+output reg fifo_full,soft_reset_0,soft_reset_1,soft_reset_2;
+output vld_out_0,vld_out_1,vld_out_2;
+
+  reg [1:0] data_in_tmp;
+  reg[4:0]count0,count1,count2;
+  
+  always@(posedge clock)
+  begin
+    if(~resetn)
+    data_in_tmp<=0;
+    else if(detect_add)
+    data_in_tmp<=data_in;
+  end
   
   
-  //------------------------------DATA OUT LOGIC---------------------------------
+  
+//-----------Address decoding & fifo empty ---------------
+always@(*)
+  begin
+    case(data_in_tmp)
+    2'b00:begin
+	  fifo_full<=full_0;
+	  if(write_enb_reg)
+	  write_enb<=3'b001;
+	  else
+	  write_enb<=0;
+	  end
+    2'b01:begin
+	  fifo_full<=full_1;
+	  if(write_enb_reg)
+	  write_enb<=3'b010;
+	  else
+	  write_enb<=0;
+	  end
+    2'b10:begin
+	  fifo_full<=full_2;
+	  if(write_enb_reg)
+	  write_enb<=3'b100;
+	  else
+	  write_enb<=0;
+	  end
+    default:begin
+	  fifo_full<=0;
+	  write_enb<=0;
+	  end
+    endcase
+  end
+  
+  
+  
+//-----------------------------------Valid Byte block----------------------------------
 
-	always@(posedge clock)
-   	begin
-      if(!resetn)
-      	begin
-	     dout    	 <=0;
-	     header  	 <=0;
-	     int_reg 	 <=0;
-       	end
-      else if(detect_add && pkt_valid && data_in[1:0]!=2'b11)
-	     header<=data_in;
-      else if(lfd_state)
-	     dout<=header;
-      else if(ld_state && !fifo_full)
-	     dout<=data_in;
-      else if(ld_state && fifo_full)
-	     int_reg<=data_in;
-      else if(laf_state)
-	     dout<=int_reg;
-     end
+assign vld_out_0 = (~empty_0);
+assign vld_out_1 = (~empty_1);
+assign vld_out_2 = (~empty_2);
 
-  //---------------------------LOW PACKET VALID LOGIC----------------------------
-	
-      	always@(posedge clock)
-	   		begin
-              if(!resetn)
-	 				low_packet_valid<=0; 
-         		else if(rst_int_reg)
-	 				low_packet_valid<=0;
+  
+//-----------------------------------Soft Reset block----------------------------------
 
-              else if(ld_state && !pkt_valid) 
-         			low_packet_valid<=1;
-			end
-  //----------------------------PARITY DONE LOGIC--------------------------------
-	
-	always@(posedge clock)
-	begin
-      if(!resetn)
-	  parity_done<=0;
-     else if(detect_add)
-	  parity_done<=0;
-      else if((ld_state && !fifo_full && !pkt_valid)
-              ||(laf_state && low_packet_valid && !parity_done))
-	  parity_done<=1;
-	end
+always@(posedge clock)
+  begin
+  
+  if(~resetn)
+  begin
+  count0<=0;
+  soft_reset_0<=0;
+  end
 
-//---------------------------PARITY CALCULATE LOGIC----------------------------
+  else if(vld_out_0)
+  begin
+  if(~read_enb_0)
+   
+    begin
+    if(count0==29)
+      begin
+      soft_reset_0<=1'b1;
+      count0<=0;
+      end
+    else
+      begin
+      soft_reset_0<=1'b0;
+      count0<=count0+1'b1;
+      end
+    end
+  else
+  count0<=0;
+  end
+  end
 
-	always@(posedge clock)
-	begin
-      if(!resetn)
-	 int_parity<=0;
-	else if(detect_add)
-	 int_parity<=0;
-	else if(lfd_state && pkt_valid)
-	 int_parity<=int_parity^header;
-	else if(ld_state && pkt_valid && !full_state)
-	 int_parity<=int_parity^data_in;
-	else
-	 int_parity<=int_parity;
-	end
-	 
+always@(posedge clock)
+  begin
+  
+  if(~resetn)
+  begin
+  count1<=0;
+  soft_reset_1<=0;
+  end
 
-//-------------------------------ERROR LOGIC-----------------------------------
+  else if(vld_out_1)
+  begin
+  if(~read_enb_1)
+   
+    begin
+    if(count1==29)
+      begin
+      soft_reset_1<=1'b1;
+      count1<=0;
+      end
+    else
+      begin
+      soft_reset_1<=1'b0;
+      count1<=count1+1'b1;
+      end
+    end
+  else
+  count1<=0;
+  end
+  end
 
-	always@(posedge clock)
-		begin
-          if(!resetn)
-	  			err<=0;
-	      else if(parity_done)
-	       		begin
-	 				if (int_parity==ext_parity)
-	    				err<=0;
-	 				else 
-	    			err<=1;
-	 			end
-	 	   else
-	    		err<=0;
-	      end
+always@(posedge clock)
+  begin
+  
+  if(~resetn)
+  begin
+  count2<=0;
+  soft_reset_2<=0;
+  end
 
-//-------------------------------EXTERNAL PARITY LOGIC-------------------------
-
-	always@(posedge clock)
-	begin
-      if(!resetn)
-	  		ext_parity<=0;
-      else if(detect_add)
-	  		ext_parity<=0;
-      else if((ld_state && !fifo_full && !pkt_valid) || (laf_state && !parity_done && low_packet_valid))
-	  		ext_parity<=data_in;
-	 end
+  else if(vld_out_2)
+  begin
+  if(~read_enb_2)
+   
+    begin
+    if(count2==29)
+      begin
+      soft_reset_2<=1'b1;
+      count2<=0;
+      end
+    else
+      begin
+      soft_reset_2<=1'b0;
+      count2<=count2+1'b1;
+      end
+    end
+  else
+  count2<=0;
+  end
+  end
 
 endmodule
+  
