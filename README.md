@@ -8,13 +8,23 @@ Routing is the process of moving a packet of data from source to destination and
 <img width="1465" height="663" alt="image" src="https://github.com/user-attachments/assets/9088b057-a08e-4d38-af71-84d8d7fdf47f" />
 
 //////////////////////////////////////////////////////////////synthesis///////////////////////////////////////////////////////////
+<br>
 ////////fifo/////////////
+<br>
 <img width="4631" height="2785" alt="image" src="https://github.com/user-attachments/assets/f3acd1e0-2e99-48a4-9060-55cc027ca97a" />
+
 ////////register/////////
+<br>
 <img width="4647" height="1533" alt="image" src="https://github.com/user-attachments/assets/16b2e1c5-89bb-467e-97dc-f3f77d113401" />
+
 ///////controller////////
+<br>
 <img width="4532" height="1739" alt="image" src="https://github.com/user-attachments/assets/79b9403f-9ffc-43fe-a2bc-c201caec070f" />
+
 //////synchronizer///////
+<br>
 <img width="4606" height="2110" alt="image" src="https://github.com/user-attachments/assets/ae2c6c1c-9eba-4ab0-b117-3bdb0609dd0f" />
+
 //////////top///////////
+<br>
 <img width="4623" height="2398" alt="image" src="https://github.com/user-attachments/assets/57411674-a8c8-4f94-b14f-aa142f7412c3" />
