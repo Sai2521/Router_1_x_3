@@ -1,7 +1,12 @@
 # Router_1_x_3
 Router 1 x 3 verilog implementation
+<br>
 <img width="1181" height="594" alt="image" src="https://github.com/user-attachments/assets/8f1799d4-762a-4545-b9ca-8b63a55a0081" />
 
+//////////////////////////////////////////////////Architecture//////////////////////////////////////////////////////////////////////////
+<img width="705" height="543" alt="image" src="https://github.com/user-attachments/assets/609301ea-64bb-43f2-963a-4db65f240625" />
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 Routing is the process of moving a packet of data from source to destination and enables messages to pass from one computer to another and eventually reach the target machine. A router is a networking device that forwards data packets between computer networks. It is connected to two or more data lines from different networks (as opposed to a network switch, which connects data lines from one single network). This project, mainly emphasizes upon the study of router device, its top level architecture, and how various sub-modules of router i.e. Register, FIFO, FSM and Synchronizer are synthesized, and simulated and finally connected to its top module.
 
